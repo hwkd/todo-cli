@@ -4,7 +4,42 @@ import "testing"
 
 // TODO: Add failure test cases
 
-type StringMap map[string]string
+func TestParsingList(t *testing.T) {
+	tests := []struct {
+		name  string
+		input []string
+		want  ParsedResult
+	}{
+		{
+			"List all todos",
+			[]string{"-l"},
+			ParsedResult{
+				Action: ActionList,
+				Values: nil,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := Parse(tt.input)
+			if err != nil {
+				t.Errorf("Expected nil, got `%s`", err)
+				return
+			}
+
+			if result.Action != tt.want.Action {
+				t.Errorf("Expected %s, got %s", tt.want.Action, result.Action)
+				return
+			}
+
+			if tt.want.Values != nil {
+				t.Errorf("Expected nil, got %v", tt.want.Values)
+				return
+			}
+		})
+	}
+}
 
 func TestParsingAdd(t *testing.T) {
 	tests := []struct {
@@ -71,30 +106,33 @@ func TestParsingUpdate(t *testing.T) {
 	}{
 		{
 			name:  "Update only title",
-			input: []string{"-u", "-t", "abc"},
+			input: []string{"-u", "1", "-t", "abc"},
 			want: ParsedResult{
 				Action: ActionUpdate,
 				Values: ParsedValues{
+					"id":    "1",
 					"title": "abc",
 				},
 			},
 		},
 		{
 			name:  "Update only description",
-			input: []string{"-u", "-d", "defgh"},
+			input: []string{"-u", "2", "-d", "defgh"},
 			want: ParsedResult{
 				Action: ActionUpdate,
 				Values: ParsedValues{
+					"id":          "2",
 					"description": "defgh",
 				},
 			},
 		},
 		{
 			name:  "Update title and description",
-			input: []string{"-u", "-t", "abc", "-d", "defgh"},
+			input: []string{"-u", "3", "-t", "abc", "-d", "defgh"},
 			want: ParsedResult{
 				Action: ActionUpdate,
 				Values: ParsedValues{
+					"id":          "3",
 					"title":       "abc",
 					"description": "defgh",
 				},
@@ -115,7 +153,7 @@ func TestParsingUpdate(t *testing.T) {
 				return
 			}
 
-			for _, field := range []string{"title", "description"} {
+			for _, field := range []string{"id", "title", "description"} {
 				if value, ok := tt.want.Values[field]; ok {
 					if result.Values[field] != value {
 						t.Errorf("Expected %s, got %s", value, result.Values[field])
@@ -138,11 +176,11 @@ func TestParsingDelete(t *testing.T) {
 	}{
 		{
 			"Get ID",
-			[]string{"-d", "123"},
+			[]string{"-d", "123", "456"},
 			ParsedResult{
 				Action: ActionDelete,
 				Values: ParsedValues{
-					"id": "123",
+					"ids": []string{"123", "456"},
 				},
 			},
 		},
@@ -161,13 +199,16 @@ func TestParsingDelete(t *testing.T) {
 				return
 			}
 
-			if id, ok := tt.want.Values["id"]; ok {
-				if result.Values["id"] != id {
-					t.Errorf("Expected %s, got %s", id, result.Values["id"])
-					return
+			if ids, ok := tt.want.Values["ids"].([]string); ok {
+				resultIds := result.Values["ids"].([]string)
+				for i, id := range ids {
+					if resultIds[i] != id {
+						t.Errorf("Expected %s, got %s", id, resultIds[i])
+						return
+					}
 				}
-			} else if id, ok := result.Values["id"]; ok {
-				t.Errorf("Expected nil, got %s", id)
+			} else if ids, ok := result.Values["ids"]; ok {
+				t.Errorf("Expected nil, got %v", ids)
 				return
 			}
 		})
@@ -186,17 +227,7 @@ func TestParsingMarkComplete(t *testing.T) {
 			ParsedResult{
 				Action: ActionMarkComplete,
 				Values: ParsedValues{
-					"id": "123",
-				},
-			},
-		},
-		{
-			"Mark todo with id 123 complete",
-			[]string{"-c", "123"},
-			ParsedResult{
-				Action: ActionMarkComplete,
-				Values: ParsedValues{
-					"id": "123",
+					"ids": []string{"123"},
 				},
 			},
 		},
@@ -215,13 +246,16 @@ func TestParsingMarkComplete(t *testing.T) {
 				return
 			}
 
-			if id, ok := tt.want.Values["id"]; ok {
-				if result.Values["id"] != id {
-					t.Errorf("Expected %s, got %s", id, result.Values["id"])
-					return
+			if ids, ok := tt.want.Values["ids"].([]string); ok {
+				resultIds := result.Values["ids"].([]string)
+				for i, id := range ids {
+					if resultIds[i] != id {
+						t.Errorf("Expected %s, got %s", id, resultIds[i])
+						return
+					}
 				}
-			} else if id, ok := result.Values["id"]; ok {
-				t.Errorf("Expected nil, got %s", id)
+			} else if ids, ok := result.Values["ids"]; ok {
+				t.Errorf("Expected nil, got %v", ids)
 				return
 			}
 		})
@@ -240,7 +274,7 @@ func TestParsingMarkIncomplete(t *testing.T) {
 			ParsedResult{
 				Action: ActionMarkIncomplete,
 				Values: ParsedValues{
-					"id": "123",
+					"ids": []string{"123"},
 				},
 			},
 		},
@@ -259,13 +293,16 @@ func TestParsingMarkIncomplete(t *testing.T) {
 				return
 			}
 
-			if id, ok := tt.want.Values["id"]; ok {
-				if result.Values["id"] != id {
-					t.Errorf("Expected %s, got %s", id, result.Values["id"])
-					return
+			if ids, ok := tt.want.Values["ids"].([]string); ok {
+				resultIds := result.Values["ids"].([]string)
+				for i, id := range ids {
+					if resultIds[i] != id {
+						t.Errorf("Expected %s, got %s", id, resultIds[i])
+						return
+					}
 				}
-			} else if id, ok := result.Values["id"]; ok {
-				t.Errorf("Expected nil, got %s", id)
+			} else if ids, ok := result.Values["ids"]; ok {
+				t.Errorf("Expected nil, got %v", ids)
 				return
 			}
 		})
