@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 	"text/tabwriter"
-	"todocli/internal/args"
-	"todocli/internal/todo"
+
+	"github.com/hwkd/todo-cli/internal/args"
+	"github.com/hwkd/todo-cli/internal/todo"
 )
 
 func main() {
@@ -32,6 +33,8 @@ func main() {
 		handleMarkCompleteAction(todoList, result.ParseMarkCompleteActionValues())
 	case args.ActionMarkIncomplete:
 		handleMarkInompleteAction(todoList, result.ParseMarkIncompleteActionValues())
+	default:
+		handleListAction(*todoList)
 	}
 }
 
