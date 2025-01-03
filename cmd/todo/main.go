@@ -39,14 +39,26 @@ func main() {
 }
 
 func handleHelpAction() {
-	fmt.Println("Usage:")
-	fmt.Println("  todo -h")
-	fmt.Println("  todo -l")
-	fmt.Println("  todo -a <title> [description]")
-	fmt.Println("  todo -u <id> <title> [description]")
-	fmt.Println("  todo -d <id>...")
-	fmt.Println("  todo -c <id>...")
-	fmt.Println("  todo -r <id>...")
+	actions := []struct {
+		flag        string
+		params      string
+		description string
+	}{
+		{"-h", "", ""},
+		{"-l", "", ""},
+		{"-a", "<title> [description]", "Add a todo item"},
+		{"-u", "<id> [-t title] [-d description]", "Update a todo item"},
+		{"-d", "<id>...", "Delete todo items by id"},
+		{"-c", "<id>...", "Mark complete by id"},
+		{"-r", "<id>...", "Mark incomplete by id"},
+	}
+
+	writer := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+	fmt.Fprint(writer, "Usage:\n")
+	for _, action := range actions {
+		fmt.Fprintf(writer, "  todo %s\t%s\t%s\n", action.flag, action.params, action.description)
+	}
+	writer.Flush()
 }
 
 func handleListAction(todoList todo.TodoList) {
