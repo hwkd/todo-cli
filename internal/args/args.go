@@ -43,6 +43,15 @@ var (
 	ErrMissingArg        = errors.New("Missing argument")
 )
 
+type ArgError struct {
+	Action string
+	error  error
+}
+
+func (e ArgError) Error() string {
+	return fmt.Sprintf("Argument error for '%s'. %s.", e.Action, e.error)
+}
+
 // Parse parses the arguments, checks for syntax, and returns error if any, or returns ParseResult otherwise
 func Parse(args []string) (*ParsedResult, error) {
 	p := newParser(args)
@@ -130,7 +139,10 @@ func (p *parser) parseAddAction() (*ParsedResult, error) {
 
 	p.read()
 	if p.arg == nil {
-		return nil, fmt.Errorf("%w: title", ErrMissingArg)
+		return nil, ArgError{
+			Action: ActionAdd,
+			error:  fmt.Errorf("%w: title", ErrMissingArg),
+		}
 	}
 
 	result := &ParsedResult{
@@ -157,13 +169,19 @@ func (p *parser) parseUpdateAction() (*ParsedResult, error) {
 
 	p.read()
 	if p.arg == nil {
-		return nil, fmt.Errorf("%w: id", ErrMissingArg)
+		return nil, ArgError{
+			Action: ActionAdd,
+			error:  fmt.Errorf("%w: id", ErrMissingArg),
+		}
 	}
 	id := *p.arg
 
 	p.read()
 	if p.arg == nil {
-		return nil, fmt.Errorf("%w: Expected -t or -d flag", ErrMissingArg)
+		return nil, ArgError{
+			Action: ActionAdd,
+			error:  fmt.Errorf("%w: Expected -t or -d flag", ErrMissingArg),
+		}
 	}
 	var title, description *string
 
@@ -171,14 +189,20 @@ func (p *parser) parseUpdateAction() (*ParsedResult, error) {
 		if *p.arg == "-t" {
 			p.read()
 			if p.arg == nil {
-				return nil, fmt.Errorf("%w: title", ErrMissingArg)
+				return nil, ArgError{
+					Action: ActionAdd,
+					error:  fmt.Errorf("%w: title", ErrMissingArg),
+				}
 			}
 			title = p.arg
 			p.read()
 		} else if *p.arg == "-d" {
 			p.read()
 			if p.arg == nil {
-				return nil, fmt.Errorf("%w: description", ErrMissingArg)
+				return nil, ArgError{
+					Action: ActionAdd,
+					error:  fmt.Errorf("%w: description", ErrMissingArg),
+				}
 			}
 			description = p.arg
 			p.read()
@@ -210,7 +234,10 @@ func (p *parser) parseDeleteAction() (*ParsedResult, error) {
 
 	ids, err := p.readIds()
 	if err != nil {
-		return nil, err
+		return nil, ArgError{
+			Action: ActionDelete,
+			error:  err,
+		}
 	}
 
 	result := &ParsedResult{
@@ -232,7 +259,10 @@ func (p *parser) parseMarkCompleteAction() (*ParsedResult, error) {
 
 	ids, err := p.readIds()
 	if err != nil {
-		return nil, err
+		return nil, ArgError{
+			Action: ActionMarkComplete,
+			error:  err,
+		}
 	}
 
 	result := &ParsedResult{
@@ -254,7 +284,10 @@ func (p *parser) parseMarkIncompleteAction() (*ParsedResult, error) {
 
 	ids, err := p.readIds()
 	if err != nil {
-		return nil, err
+		return nil, ArgError{
+			Action: ActionMarkIncomplete,
+			error:  err,
+		}
 	}
 
 	result := &ParsedResult{
