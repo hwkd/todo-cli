@@ -89,57 +89,63 @@ func TestTodoListGet(t *testing.T) {
 	}
 }
 
-// func TestTodoListUpdate(t *testing.T) {
-// 	todoList := NewTodoList()
-// 	todo := NewTodoItem("Task 1", "Created for test")
-// 	todoList.Add(todo)
-// 	todo.Title = "Task 2"
-// 	// Ensure todo is copied by value, not reference.
-// 	if todoList.Todos[0].Title == "Task 2" {
-// 		t.Errorf("Expected Task 1, got %s", todoList.Todos[0].Title)
-// 	}
-// 	todoList.Update(todo)
-// 	// todoList should be updated.
-// 	if todoList.Todos[0].Title != "Task 2" {
-// 		t.Errorf("Expected Task 2, got %s", todoList.Todos[0].Title)
-// 	}
-// 	todo.Done()
-// 	todoList.Update(todo)
-// 	if todoList.Todos[0].IsDone != true {
-// 		t.Errorf("Expected true, got %t", todo.IsDone)
-// 	}
-// }
-//
-// func TestTodoDone(t *testing.T) {
-// 	todo := NewTodoItem("Task 1", "Created for test")
-// 	todo.Done()
-// 	if todo.IsDone != true {
-// 		t.Errorf("Expected true, got %t", todo.IsDone)
-// 	}
-// 	todo.Undone()
-// 	if todo.IsDone != false {
-// 		t.Errorf("Expected false, got %t", todo.IsDone)
-// 	}
-// }
-//
-// func TestTodoDelete(t *testing.T) {
-// 	todoList := NewTodoList()
-// 	origin_len := 5
-// 	for i := 0; i < origin_len; i++ {
-// 		todo := NewTodoItem(fmt.Sprintf("Task %d", i), fmt.Sprintf("Desc %d", i))
-// 		todo.ID = i
-// 		todoList.Add(todo)
-// 	}
-//
-// 	id := 2
-// 	todoList.Delete(id)
-// 	new_len := origin_len - 1
-// 	if len(todoList.Todos) != new_len {
-// 		t.Errorf("Expected %d, got %d", new_len, len(todoList.Todos))
-// 	}
-// 	for _, todo := range todoList.Todos {
-// 		if todo.ID == id {
-// 			t.Errorf("ID %d should be deleted", id)
-// 		}
-// 	}
-// }
+func TestTodoListUpdate(t *testing.T) {
+	todoList, err := NewTodoList(NewTodoListCsvStore("todos.csv"))
+	if err != nil {
+		t.Errorf("Expected nil, got %s", err.Error())
+	}
+	todo := NewTodoItem("Task 1", "Created for test")
+	todoList.Add(*todo)
+	todo.Title = "Task 2"
+	// Ensure todo is copied by value, not reference.
+	if todoList.Todos[0].Title == "Task 2" {
+		t.Errorf("Expected Task 1, got %s", todoList.Todos[0].Title)
+	}
+	todoList.Update(*todo)
+	// todoList should be updated.
+	if todoList.Todos[0].Title != "Task 2" {
+		t.Errorf("Expected Task 2, got %s", todoList.Todos[0].Title)
+	}
+	todo.Done()
+	todoList.Update(*todo)
+	if todoList.Todos[0].IsDone != true {
+		t.Errorf("Expected true, got %t", todo.IsDone)
+	}
+}
+
+func TestTodoDone(t *testing.T) {
+	todo := NewTodoItem("Task 1", "Created for test")
+	todo.Done()
+	if todo.IsDone != true {
+		t.Errorf("Expected true, got %t", todo.IsDone)
+	}
+	todo.Undone()
+	if todo.IsDone != false {
+		t.Errorf("Expected false, got %t", todo.IsDone)
+	}
+}
+
+func TestTodoDelete(t *testing.T) {
+	todoList, err := NewTodoList(NewTodoListCsvStore("todos.csv"))
+	if err != nil {
+		t.Errorf("Expected nil, got %s", err.Error())
+	}
+	origin_len := 5
+	for i := 0; i < origin_len; i++ {
+		todo := NewTodoItem(fmt.Sprintf("Task %d", i), fmt.Sprintf("Desc %d", i))
+		todo.ID = strconv.Itoa(i)
+		todoList.Add(*todo)
+	}
+
+	id := 2
+	todoList.Delete(strconv.Itoa(id))
+	new_len := origin_len - 1
+	if len(todoList.Todos) != new_len {
+		t.Errorf("Expected %d, got %d", new_len, len(todoList.Todos))
+	}
+	for _, todo := range todoList.Todos {
+		if todo.ID == strconv.Itoa(id) {
+			t.Errorf("ID %d should be deleted", id)
+		}
+	}
+}

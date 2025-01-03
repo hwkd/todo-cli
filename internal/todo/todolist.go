@@ -1,10 +1,5 @@
 package todo
 
-import (
-	"crypto/sha1"
-	"encoding/hex"
-)
-
 type TodoList struct {
 	Todos    []TodoItem
 	modified bool
@@ -44,7 +39,6 @@ func (todoList *TodoList) Get(id string) *TodoItem {
 
 // Add appends a TodoItem to the list.
 func (todoList *TodoList) Add(todo TodoItem) {
-	todoList.assignID(&todo)
 	todoList.Todos = append(todoList.Todos, todo)
 	todoList.modified = true
 }
@@ -84,14 +78,6 @@ func (todoList *TodoList) Flush() error {
 	todoList.modified = false
 
 	return nil
-}
-
-// assignID assigns a unique ID to a TodoItem.
-func (todoList *TodoList) assignID(todo *TodoItem) {
-	hasher := sha1.New()
-	hasher.Write([]byte(todo.Title + todo.Description))
-	hashSum := hasher.Sum(nil)
-	todo.ID = hex.EncodeToString(hashSum)
 }
 
 // setTodos sets the list of TodoItems.

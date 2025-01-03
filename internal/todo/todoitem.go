@@ -1,6 +1,8 @@
 package todo
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"time"
@@ -18,7 +20,7 @@ type TodoItem struct {
 }
 
 func NewTodoItem(title, desc string) *TodoItem {
-	return &TodoItem{
+	todo := &TodoItem{
 		ID:          "",
 		Title:       title,
 		Description: desc,
@@ -28,6 +30,8 @@ func NewTodoItem(title, desc string) *TodoItem {
 		dirty:       false,
 		deleted:     false,
 	}
+	todo.assignID()
+	return todo
 }
 
 func NewTodoItemFromStrings(id, title, desc, isDone, createdAt, updatedAt string) (*TodoItem, error) {
@@ -54,6 +58,15 @@ func NewTodoItemFromStrings(id, title, desc, isDone, createdAt, updatedAt string
 		CreatedAt:   createdAtDateTime,
 		UpdatedAt:   updatedAtDateTime,
 	}, nil
+}
+
+// assignID assigns a unique ID to the TodoItem.
+func (todo *TodoItem) assignID() {
+	now := time.Now()
+	hasher := sha1.New()
+	hasher.Write([]byte(todo.Title + todo.Description + now.Format("2006-01-02 15:04:05 MST")))
+	hashSum := hasher.Sum(nil)
+	todo.ID = hex.EncodeToString(hashSum)[:16]
 }
 
 func (todo *TodoItem) Done() {

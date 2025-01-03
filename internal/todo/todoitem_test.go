@@ -6,14 +6,13 @@ func TestTodoItem(t *testing.T) {
 	t.Run("NewTodoItem", func(t *testing.T) {
 		todo := NewTodoItem("Task 1", "Created for test")
 		want := TodoItem{
-			ID:          "",
+			ID:          todo.ID,
 			Title:       "Task 1",
 			Description: "Created for test",
 			IsDone:      false,
 		}
 
-		// Unsaved todo ID should be -1.
-		if todo.ID != want.ID {
+		if todo.ID == "" {
 			t.Errorf("Expected %s, got %s", want.ID, todo.ID)
 		}
 		if todo.Title != want.Title {
