@@ -28,6 +28,7 @@ Usage:
 
 const (
 	ActionUndefined      = "undefined"
+	ActionHelp           = "help"
 	ActionList           = "list"
 	ActionAdd            = "add"
 	ActionUpdate         = "update"
@@ -58,6 +59,10 @@ type parser struct {
 
 // newParser creates a new argument parser
 func newParser(args []string) parser {
+	if len(args) == 0 {
+		// If no arguments are provided, default to list action
+		args = []string{"-l"}
+	}
 	p := parser{args: args}
 	p.read()
 	return p
@@ -65,21 +70,14 @@ func newParser(args []string) parser {
 
 // parse parses the arguments and returns the parsed action and values
 func (p *parser) parse() (*ParsedResult, error) {
-	if len(p.args) == 0 {
-		return &ParsedResult{
-			Action: ActionUndefined,
-			Values: nil,
-		}, nil
-	}
-
 	return p.parseAction()
 }
 
 // parseAction parses the action based on the first argument
 func (p *parser) parseAction() (*ParsedResult, error) {
 	switch *p.arg {
-	case "-l":
-		return p.parseListAction()
+	case "-h":
+		return p.parseHelpAction()
 	case "-a":
 		return p.parseAddAction()
 	case "-u":
@@ -90,9 +88,24 @@ func (p *parser) parseAction() (*ParsedResult, error) {
 		return p.parseMarkCompleteAction()
 	case "-r":
 		return p.parseMarkIncompleteAction()
+	case "-l":
+		return p.parseListAction()
 	default:
 		return nil, ErrUnsupportedAction
 	}
+}
+
+// Parses `todo -h`
+func (p *parser) parseHelpAction() (*ParsedResult, error) {
+	err := p.checkFlag("-h")
+	if err != nil {
+		return nil, err
+	}
+
+	return &ParsedResult{
+		Action: ActionHelp,
+		Values: nil,
+	}, nil
 }
 
 // Parses `todo -l`

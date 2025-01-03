@@ -21,6 +21,8 @@ func main() {
 	}
 
 	switch result.Action {
+	case args.ActionHelp:
+		handleHelpAction()
 	case args.ActionList:
 		handleListAction(*todoList)
 	case args.ActionAdd:
@@ -33,9 +35,18 @@ func main() {
 		handleMarkCompleteAction(todoList, result.ParseMarkCompleteActionValues())
 	case args.ActionMarkIncomplete:
 		handleMarkInompleteAction(todoList, result.ParseMarkIncompleteActionValues())
-	default:
-		handleListAction(*todoList)
 	}
+}
+
+func handleHelpAction() {
+	fmt.Println("Usage:")
+	fmt.Println("  todo -h")
+	fmt.Println("  todo -l")
+	fmt.Println("  todo -a <title> [description]")
+	fmt.Println("  todo -u <id> <title> [description]")
+	fmt.Println("  todo -d <id>...")
+	fmt.Println("  todo -c <id>...")
+	fmt.Println("  todo -r <id>...")
 }
 
 func handleListAction(todoList todo.TodoList) {

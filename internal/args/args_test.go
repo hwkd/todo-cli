@@ -4,6 +4,80 @@ import "testing"
 
 // TODO: Add failure test cases
 
+func TestParsingHelp(t *testing.T) {
+	tests := []struct {
+		name  string
+		input []string
+		want  ParsedResult
+	}{
+		{
+			"Help",
+			[]string{"-h"},
+			ParsedResult{
+				Action: ActionHelp,
+				Values: nil,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := Parse(tt.input)
+			if err != nil {
+				t.Errorf("Expected nil, got `%s`", err)
+				return
+			}
+
+			if result.Action != tt.want.Action {
+				t.Errorf("Expected %s, got %s", tt.want.Action, result.Action)
+				return
+			}
+
+			if tt.want.Values != nil {
+				t.Errorf("Expected nil, got %v", tt.want.Values)
+				return
+			}
+		})
+	}
+}
+
+func TestParsingEmpty(t *testing.T) {
+	tests := []struct {
+		name  string
+		input []string
+		want  ParsedResult
+	}{
+		{
+			"Empty input should default to list",
+			[]string{},
+			ParsedResult{
+				Action: ActionList,
+				Values: nil,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := Parse(tt.input)
+			if err != nil {
+				t.Errorf("Expected nil, got `%s`", err)
+				return
+			}
+
+			if result.Action != tt.want.Action {
+				t.Errorf("Expected %s, got %s", tt.want.Action, result.Action)
+				return
+			}
+
+			if tt.want.Values != nil {
+				t.Errorf("Expected nil, got %v", tt.want.Values)
+				return
+			}
+		})
+	}
+}
+
 func TestParsingList(t *testing.T) {
 	tests := []struct {
 		name  string
